@@ -5,62 +5,6 @@ import time
 import requests
 import subprocess as sp
 
-def getIPAddresses():
-    from ctypes import Structure, windll, sizeof
-    from ctypes import POINTER, byref
-    from ctypes import c_ulong, c_uint, c_ubyte, c_char
-    MAX_ADAPTER_DESCRIPTION_LENGTH = 128
-    MAX_ADAPTER_NAME_LENGTH = 256
-    MAX_ADAPTER_ADDRESS_LENGTH = 8
-    class IP_ADDR_STRING(Structure):
-        pass
-    LP_IP_ADDR_STRING = POINTER(IP_ADDR_STRING)
-    IP_ADDR_STRING._fields_ = [
-        ("next", LP_IP_ADDR_STRING),
-        ("ipAddress", c_char * 16),
-        ("ipMask", c_char * 16),
-        ("context", c_ulong)]
-    class IP_ADAPTER_INFO (Structure):
-        pass
-    LP_IP_ADAPTER_INFO = POINTER(IP_ADAPTER_INFO)
-    IP_ADAPTER_INFO._fields_ = [
-        ("next", LP_IP_ADAPTER_INFO),
-        ("comboIndex", c_ulong),
-        ("adapterName", c_char * (MAX_ADAPTER_NAME_LENGTH + 4)),
-        ("description", c_char * (MAX_ADAPTER_DESCRIPTION_LENGTH + 4)),
-        ("addressLength", c_uint),
-        ("address", c_ubyte * MAX_ADAPTER_ADDRESS_LENGTH),
-        ("index", c_ulong),
-        ("type", c_uint),
-        ("dhcpEnabled", c_uint),
-        ("currentIpAddress", LP_IP_ADDR_STRING),
-        ("ipAddressList", IP_ADDR_STRING),
-        ("gatewayList", IP_ADDR_STRING),
-        ("dhcpServer", IP_ADDR_STRING),
-        ("haveWins", c_uint),
-        ("primaryWinsServer", IP_ADDR_STRING),
-        ("secondaryWinsServer", IP_ADDR_STRING),
-        ("leaseObtained", c_ulong),
-        ("leaseExpires", c_ulong)]
-    GetAdaptersInfo = windll.iphlpapi.GetAdaptersInfo
-    GetAdaptersInfo.restype = c_ulong
-    GetAdaptersInfo.argtypes = [LP_IP_ADAPTER_INFO, POINTER(c_ulong)]
-    adapterList = (IP_ADAPTER_INFO * 10)()
-    buflen = c_ulong(sizeof(adapterList))
-    rc = GetAdaptersInfo(byref(adapterList[0]), byref(buflen))
-    if rc == 0:
-        for a in adapterList:
-            adNode = a.ipAddressList
-            while True:
-                try:
-                    ipAddr = adNode.ipAddress
-                    if ipAddr:
-                        yield ipAddr
-                    adNode = adNode.next
-                    if not adNode:
-                        break
-                except Exception:
-                    break
 
 class Matrix:
     packet_frames = 8
@@ -165,16 +109,14 @@ class Matrix:
 
     @staticmethod
     def get_local_ip():
-        print([l for l in (
+        ips = [l for l in (
             [ip for ip in socket.gethostbyname_ex(socket.gethostname())[2] if not ip.startswith("127.")][:1], [
                 [(s.connect(('8.8.8.8', 53)), s.getsockname()[0], s.close()) for s in
-                 [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]]) if l])
-        for addr in getIPAddresses():
-            addr = addr.decode('utf8')
+                 [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]]) if l]
+        for addr in ips:
+            addr = addr[0]
             if Matrix.check_format_ip(addr):
                 return addr
-
-
 
         raise ValueError('Cannot determine local ip address')
         local_host = []

@@ -109,10 +109,10 @@ class Matrix:
 
     @staticmethod
     def get_local_ip():
-        ips = [l for l in (
+        ips = sorted([l for l in (
             [ip for ip in socket.gethostbyname_ex(socket.gethostname())[2] if not ip.startswith("127.")][:1], [
                 [(s.connect(('8.8.8.8', 53)), s.getsockname()[0], s.close()) for s in
-                 [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]]) if l]
+                 [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]]) if l])
         for addr in ips:
             addr = addr[0]
             if Matrix.check_format_ip(addr):
@@ -136,7 +136,6 @@ class Matrix:
         iprange = f'{local_host[:local_host.rfind(".")]}.0/24'
         cmd = ['nmap', '-sP', iprange]
         out, err = sp.Popen(cmd, shell=True, stdout=sp.PIPE, stderr=sp.PIPE, encoding='utf8').communicate(timeout=10)
-        print(out, err, cmd)
         prev_ip = None
         for line in out.split('\n'):
             line = line.strip()

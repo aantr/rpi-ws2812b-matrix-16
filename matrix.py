@@ -106,12 +106,17 @@ class Matrix:
 
     @staticmethod
     def get_local_ip():
+        local_host = []
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
             s.connect(('8.8.8.8', 4792))
-            local_host = s.getsockname()[0]
-        if not Matrix.check_format_ip(local_host):
-            raise ValueError('Cannot determine local ip address')
-        return local_host
+            local_host.append(s.getsockname()[0])
+        hostname = socket.gethostname()
+        local_host.append(socket.gethostbyname(hostname))
+        print(local_host)
+        for i in local_host:
+            if Matrix.check_format_ip(i):
+                return local_host
+        raise ValueError('Cannot determine local ip address')
 
     @staticmethod
     def find_host():

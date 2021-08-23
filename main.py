@@ -84,7 +84,7 @@ if __name__ == '__main__':
 
     while True:
         suc = True
-        # host, port = input('Custom ip (empty for default scan): ').strip(), 4792
+        host, port = input('Custom ip (empty for default scan): ').strip(), 4792
         host, port = '', 4792
         if not host:
             print('Scanning...')

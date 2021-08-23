@@ -93,16 +93,19 @@ class Matrix:
 
     @staticmethod
     def check_format_ip(s):
-        suc = True
-        parts = s.split(".")
-        if len(parts) != 4:
-            suc = False
-        if parts[:2] != ['192', '168']:
-            suc = False
-        for item in parts:
-            if not 0 <= int(item) <= 255:
+        try:
+            suc = True
+            parts = s.split(".")
+            if len(parts) != 4:
                 suc = False
-        return suc
+            if parts[:2] != ['192', '168']:
+                suc = False
+            for item in parts:
+                if not 0 <= int(item) <= 255:
+                    suc = False
+            return suc
+        except Exception:
+            return False
 
     @staticmethod
     def get_local_ip():

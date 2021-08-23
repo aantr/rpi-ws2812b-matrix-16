@@ -135,7 +135,7 @@ class Matrix:
         local_host = Matrix.get_local_ip()
         iprange = f'{local_host[:local_host.rfind(".")]}.0/24'
         cmd = ['nmap', '-sP', iprange]
-        out, err = sp.Popen(cmd, shell=True, stdout=sp.PIPE, stderr=sp.PIPE, encoding='utf8').communicate(timeout=10)
+        out, err = sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.PIPE, encoding='utf8').communicate(timeout=30)
         print(out, err, cmd)
         prev_ip = None
         for line in out.split('\n'):

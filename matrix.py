@@ -97,6 +97,8 @@ class Matrix:
         parts = s.split(".")
         if len(parts) != 4:
             suc = False
+        if parts[:2] != ('192', '168'):
+            suc = False
         for item in parts:
             if not 0 <= int(item) <= 255:
                 suc = False
@@ -105,7 +107,7 @@ class Matrix:
     @staticmethod
     def get_local_ip():
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-            s.connect(('8.8.8.8', 0))
+            s.connect(('8.8.8.8', 4792))
             local_host = s.getsockname()[0]
         if not Matrix.check_format_ip(local_host):
             raise ValueError('Cannot determine local ip address')

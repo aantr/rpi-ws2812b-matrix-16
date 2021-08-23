@@ -106,6 +106,12 @@ class Matrix:
 
     @staticmethod
     def get_local_ip():
+        from netifaces import interfaces, ifaddresses, AF_INET
+        for ifaceName in interfaces():
+            addresses = [i['addr'] for i in ifaddresses(ifaceName).setdefault(AF_INET, [{'addr': ''}])]
+            if Matrix.check_format_ip(addresses[0]):
+                return addresses[0]
+        raise ValueError('Cannot determine local ip address')
         local_host = []
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
             s.connect(('8.8.8.8', 4792))
@@ -115,8 +121,7 @@ class Matrix:
         print(local_host)
         for i in local_host:
             if Matrix.check_format_ip(i):
-                return local_host
-        raise ValueError('Cannot determine local ip address')
+                return i
 
     @staticmethod
     def find_host():

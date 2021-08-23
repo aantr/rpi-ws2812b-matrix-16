@@ -136,6 +136,7 @@ class Matrix:
         iprange = f'{local_host[:local_host.rfind(".")]}.0/24'
         cmd = ['nmap', '-sP', iprange]
         out, err = sp.Popen(cmd, shell=True, stdout=sp.PIPE, stderr=sp.PIPE, encoding='utf8').communicate(timeout=10)
+        print(out, err, cmd)
         prev_ip = None
         for line in out.split('\n'):
             line = line.strip()

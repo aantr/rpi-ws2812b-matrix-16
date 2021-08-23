@@ -97,7 +97,7 @@ class Matrix:
         parts = s.split(".")
         if len(parts) != 4:
             suc = False
-        if parts[:2] != ('192', '168'):
+        if parts[:2] != ['192', '168']:
             suc = False
         for item in parts:
             if not 0 <= int(item) <= 255:

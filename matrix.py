@@ -112,6 +112,7 @@ class Matrix:
         from netifaces import interfaces, ifaddresses, AF_INET
         for ifaceName in interfaces():
             addresses = [i['addr'] for i in ifaddresses(ifaceName).setdefault(AF_INET, [{'addr': ''}])]
+            print(addresses)
             if Matrix.check_format_ip(addresses[0]):
                 return addresses[0]
         raise ValueError('Cannot determine local ip address')

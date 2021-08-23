@@ -114,13 +114,10 @@ class Matrix:
     @staticmethod
     def find_host():
         local_host = Matrix.get_local_ip()
-        scr_dir = os.path.split(__file__)[0]
-        resfile = os.path.join(scr_dir, 'scan.txt')
-        resfile = 'scan.txt'
         iprange = f'{local_host[:local_host.rfind(".")]}.0/24'
         cmd = ['nmap', '-sP', iprange]
         out, err = sp.Popen(cmd, shell=True, stdout=sp.PIPE, stderr=sp.PIPE, encoding='utf8').communicate(timeout=10)
-
+        print(out, err)
         prev_ip = None
         for line in out.split('\n'):
             line = line.strip()

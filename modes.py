@@ -10,14 +10,14 @@ def hsv2rgb(h, s, v):
 
 
 class State:
-    speed = 200
+    speed = 30
 
     def get_frame(self, idx):
         ...
 
 
 class StringState(State):
-    speed = 255
+    speed = 40
 
     def __init__(self):
         sym = open('font/sym.txt', encoding='utf8').read()
@@ -67,7 +67,7 @@ class StringState(State):
 
 
 class SnowState(State):
-    speed = 255
+    speed = 80
 
     def __init__(self):
         self.m_snow = [[(0, 0, 0) for _ in range(16)] for _ in range(16)]
@@ -80,7 +80,7 @@ class SnowState(State):
 
 
 class GifState(State):
-    speed = 200
+    speed = 10
 
     def __init__(self):
         directory = 'gif'
@@ -118,7 +118,7 @@ class GifState(State):
 
 
 class RainbowState(State):
-    speed = 255
+    speed = 100
 
     def get_frame(self, idx):
         k = 10
@@ -128,9 +128,9 @@ class RainbowState(State):
 
 
 class FireState(State):
-    speed = 255
+    speed = 90
     HUE_ADD = 0
-    HUE_MUL = 2
+    HUE_MUL = 1.5
 
     def __init__(self):
         self.valueMask = [
@@ -211,7 +211,7 @@ class FireState(State):
 
 
 class MatrixState(State):
-    speed = 255
+    speed = 80
 
     def __init__(self):
         self.m = [[(0, 0, 0) for i in range(16)] for j in range(16)]

@@ -7,9 +7,9 @@ import subprocess as sp
 
 
 class Matrix:
-    packet_frames = 8
-    base_delay = 0.5
-    middle_frames = packet_frames * 3
+    packet_frames = 16
+    send_time = 1.5
+    delay = 1
     count = 0
     null_state = [[(0, 0, 0) for _ in range(16)] for _ in range(16)]
 
@@ -18,7 +18,7 @@ class Matrix:
         self.port = port
         self.url_base = f'http://{host}:{port}'
         self.url_animation = self.url_base + '/animation'
-        self.url_speed = self.url_base + '/speed/{}'
+        self.url_fps = self.url_base + '/fps/{}'
         self.url_brightness = self.url_base + '/brightness/{}'
         self.url_clear = self.url_base + '/clear'
         self.url_button_callback = self.url_base + '/button_callback?url={}'
@@ -41,8 +41,8 @@ class Matrix:
     def set_brightness(self, value):
         self.safe_request(self.url_brightness.format(value))
 
-    def set_speed(self, value):
-        self.safe_request(self.url_speed.format(value))
+    def set_fps(self, value):
+        self.safe_request(self.url_fps.format(value))
 
     def clear(self):
         self.safe_request(self.url_clear)
@@ -51,31 +51,41 @@ class Matrix:
         check = False
         while True:
             try:
-                delay = self.base_delay
                 if check:
                     response = requests.post(self.url_animation)
                     check = False
                 else:
                     response = self.send_frames()
-                queue = int(response.text)
-                if queue < self.middle_frames:
-                    delay /= 2
-                if queue > self.middle_frames + self.packet_frames:
+                server_frames, server_delay = map(float, response.text.split(','))
+                time_s = server_frames * server_delay
+                if time_s > self.delay + 0.5:
                     check = True
-                # print(queue, delay, check)
-
-                time.sleep(delay)
+                time.sleep(self.delay)
             except requests.exceptions.RequestException as e:
-                input(str(e) + '\nPress enter to continue')
-                time.sleep(self.base_delay)
+                exit(str(e))
 
-    def send_frames(self):
-        return requests.post(self.url_animation, self.get_frames())
+    def update_packet_frames(self, response):
+        server_frames, server_delay = map(float, response.text.split(','))
+        self.packet_frames = int(self.send_time / server_delay)
+
+    def send_frames(self, **kwargs):
+        if kwargs:
+            self.update_packet_frames(
+                requests.post(
+                    self.url_animation + f'?{"&".join([f"{k}={int(v)}" for k, v in kwargs.items()])}',
+                    self.get_frames())
+            )
+            response = requests.post(self.url_animation, self.get_frames())
+        else:
+            response = requests.post(self.url_animation + f'?{"&".join([f"{k}={int(v)}" for k, v in kwargs.items()])}',
+                                     self.get_frames())
+            self.update_packet_frames(response)
+        return response
 
     @staticmethod
-    def safe_request(url, data=None):
+    def safe_request(url, data=None, **kwargs):
         try:
-            response = requests.post(url, data)
+            response = requests.post(url, data=data, **kwargs)
         except requests.exceptions.RequestException:
             return
         return response
@@ -117,18 +127,7 @@ class Matrix:
             addr = addr[0]
             if Matrix.check_format_ip(addr):
                 return addr
-
         raise ValueError('Cannot determine local ip address')
-        local_host = []
-        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-            s.connect(('8.8.8.8', 4792))
-            local_host.append(s.getsockname()[0])
-        hostname = socket.gethostname()
-        local_host.append(socket.gethostbyname(hostname))
-        print(local_host)
-        for i in local_host:
-            if Matrix.check_format_ip(i):
-                return i
 
     @staticmethod
     def find_host():
@@ -136,7 +135,6 @@ class Matrix:
         iprange = f'{local_host[:local_host.rfind(".")]}.0/24'
         cmd = ['nmap', '-sP', iprange]
         out, err = sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.PIPE, encoding='utf8').communicate(timeout=30)
-        print(out, err, cmd)
         prev_ip = None
         for line in out.split('\n'):
             line = line.strip()

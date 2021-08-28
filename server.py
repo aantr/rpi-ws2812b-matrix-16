@@ -3,10 +3,12 @@ import threading
 
 from flask import Flask, request, abort
 import time
-import board
-import neopixel
 import socket
+
 import RPi.GPIO as GPIO
+import neopixel
+import board
+
 import requests
 
 log = logging.getLogger('werkzeug')

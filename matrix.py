@@ -6,7 +6,7 @@ import subprocess as sp
 
 class Matrix:
     packet_frames = 1
-    delay = 0.01
+    delay = 0.02
     count = 0
     null_state = [[(0, 0, 0) for _ in range(16)] for _ in range(16)]
 

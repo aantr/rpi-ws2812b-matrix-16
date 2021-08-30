@@ -1,5 +1,6 @@
 import json
 import os
+import socket
 import threading
 from flask import Flask, request
 import logging
@@ -28,7 +29,6 @@ def switch_mode_next():
     states = states[1:] + states[:1]
     current = states[0]
     current.__init__()
-    matrix.send_frames(clear=True, fps=current.speed)
 
 
 def switch_mode_prev():
@@ -38,13 +38,11 @@ def switch_mode_prev():
     states = states[-1:] + states[:-1]
     current = states[0]
     current.__init__()
-    matrix.send_frames(clear=True, fps=current.speed)
 
 
 def switch_off_on():
     global enabled
     enabled = not enabled
-    matrix.send_frames(clear=True)
     if not enabled:
         states[0].__init__()
 
@@ -65,7 +63,7 @@ def hue_add(value):
 
 
 enabled = True
-states = [FireState(), MatrixState(), RainbowState(), StringState(), SnowState(), GifState()]
+states = [FireState(), MatrixState(), RainbowState(), StringState(), SnowState()]
 
 
 def get_state(*args, **kwargs):
@@ -100,7 +98,7 @@ if __name__ == '__main__':
         exit()
     open(saved_host, 'w', encoding='utf8').write(host)
     matrix = Matrix(host, port, get_state)
-    print(f'Host was found: {matrix.url_base}')
+    print(f'Host was found: "{host}"')
     matrix.clear()
     matrix.set_brightness(150)
     matrix.set_fps(90)
@@ -114,4 +112,7 @@ if __name__ == '__main__':
         daemon=True)
     thread.start()
 
-    matrix.run()
+    try:
+        matrix.run()
+    except socket.error:
+        print('Server aborted')
